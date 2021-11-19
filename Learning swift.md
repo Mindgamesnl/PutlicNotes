@@ -1,4 +1,5 @@
-# Learning swift
+# Language Syntax
+#PROJECTS/LEARNING_SWIFT
 
 Swift feels a lot like Go with some traits of JS.
 These are my personal notes of [YouTube](https://www.youtube.com/watch?v=Pd8IvykiW20&t=1586s)
@@ -53,6 +54,8 @@ fun getSum(x: Int, y: Int) -> Int {
 }
 print(getSum(x: 5, y: 4))
 ```
+
+Functions have support for `defer`, just like Go.
 
 ### Closure
 Closures are basically Lambda’s
@@ -133,7 +136,7 @@ This is slightly disappointing, swift doesn’t seem to have common string utili
 	* Replace a range `str.replaceSubrange(sub, with: “ is super)`
 	* Ore remove a range `str.removeSubrange(sub)`
 
-### TOOPLS
+### TUPLES (pronounced TOOPLS)
 WHO THE FUCK COMES UP WITH THESE NAMES? AM I EVEN TYPING THEM CORRECTLY? WHATS GOING ON?!!
 Noting this down as a codeblock with example code, because that’s the only way to keep my mind together with this shit
 
@@ -159,10 +162,16 @@ enum Emotion {
 	case joy
 	case anger
 	case fear
-	case disgust
+	case disgust(reason :String)
 }
 
 var feeling = Emotion.joy
+```
+
+Cool thing tho! Notice how disgust has a value? That’s because you can add properties to enum types! These aren’t static or contant like in java.
+Example:
+```swift
+var moods = [Emotion.disgust(reason: “Bad joke”), Emotion.disgust(reason: “Awful human”)]
 ```
 
 ### Optionals
@@ -194,6 +203,13 @@ do {
 	print(“Well, what did you expect”)
 }
 ```
+The catch above only handles specific `DivideByZero` errors but doesn’t cover all `DivisionError` types. You can catch general types with `} catch DivisionError {`, or an un-typed `} catch {`, the catch-block has access to an `error` variable, which is the exception originally thrown. You can assign the error and cast it inline to print, like so `} catch let divisionErr as DivisionError }` and then print it.
+
+We can get really fancy through, let’s say that we have a `get` method that does a HTTP get request, and it returns a String or throws an exception, we can catch it INLINE as an optional
+```sift
+let body: String? = try? Get(“https://example.com/“)
+```
+Tada! Now we have an optional string, that’s present when get succeeded, and nil when it fucked up big time.
 
 ### Constructs
 Yessss YESSS **YESSSSSS**
@@ -261,6 +277,8 @@ class Warrior {
 We can create an object instance like
 `var w = Warrior(“Thor”, 150, 20, 8)`, and call static methods like `Warrior.getAttkResult(`
 
+Let’s say that we wanted to clean up before the GC removes our instance, then we could add a `deinit {}` block that gets called before removal
+
 ### Protocols
 Protocols are basically interfaces, and the name makes sense because it’s a predefined set of rules a class must follow to be compatible. Implementing is called adopting, so classes adopt protocols.
 
@@ -318,5 +336,68 @@ extension String: Summable{}
 func sum<T: Summable>(_ x: T, _ y: T) -> T {
 	return x + y
 }
+```
 
+### Type Aliases
+Swift supports type aliasing just like Go and Rust, this allows you to define a custom type that’s actually something else, but you may want to differentiate.
+```swift
+typealias UserID = UInt16
+```
+
+### Blobs
+Not more to say about it
+```swift
+let multilineString = “””
+I’m
+A
+Text
+“””
+```
+
+### Apple API versions
+You can check environment api availability like follows
+```swift
+if #available(iOS 10, macOS 10.12, *) {
+    // Use iOS 10 APIs on iOS, and use macOS 10.12 APIs on macOS
+} else {
+    // Fall back to earlier iOS and macOS APIs
+}
+```
+
+### Concurrency
+Concurrency in Swift is similar to that in JS, as in, it uses asyncronemous methods and keywords and doesn’t let you interact with threads directly. It does differentiate between Parallel and Async but like it should be *fineeeeeee*
+
+```swift
+func listPhotos(inGallery name: String) async -> [String] {
+    let result = // ... some asynchronous networking code ...
+    return result
+}
+```
+
+And you can pull it back using `await`, or prefix functions with `async`
+
+Its also possible to await multiple async methods at once (like promise all)
+```swift
+async let firstPhoto = downloadPhoto(named: photoNames[0])
+async let secondPhoto = downloadPhoto(named: photoNames[1])
+async let thirdPhoto = downloadPhoto(named: photoNames[2])
+
+let photos = await [firstPhoto, secondPhoto, thirdPhoto]
+show(photos)
+```
+
+### Type Checking
+Many languages support `instanceof`or `typeof`, swift has a more “no bullshit” approach and simply uses `is`, you can check hierarchy or protocol using that keyword. This would simply look like `if item is Movie {`
+
+### Downcasting
+It could happen that you get a variable of a type, but actually want to downcast it to a subtype after checking its type. Given `var item: Movie`, you can cast it to shortfilm (which extends Movie) using `let sf = item as? ShortFilm { print(sf.title) }`
+
+### Any & AnyObject
+Swift is a type safe language at its core, cut there might be cases where you don’t know the type of something. These can be `Any` if its literally anything (type, function, class, whatever) or `AnyObject` its any class instance, but has to be an instance.
+```swift
+var things: [Any] = []
+things.append(0)
+things.append("hello")
+things.append(Movie(name: "Ghostbusters", director: "Ivan Reitman"))
+things.append({ (name: String) -> String in "Hello, \(name)" })
 ```
